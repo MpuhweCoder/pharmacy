@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AdminController;
 use App\Http\Controllers\Auth\PharmacistController;
 use App\Http\Controllers\Auth\CustomerController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\MedicineController;
 
 // ─── Public Routes ─────────────────────────────────────────────────────────
 
@@ -25,10 +27,26 @@ Route::get('/register',  [RegisterController::class, 'showRegistrationForm'])->n
 Route::post('/register', [RegisterController::class, 'register']);
 
 // ─── Admin Routes (only admin can access) ──────────────────────────────────
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/dashboard',        [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/users',            [AdminController::class, 'users'])->name('users');
-    Route::patch('/users/{user}/toggle', [AdminController::class, 'toggleUser'])->name('users.toggle');
+
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\MedicineController;
+
+// ─── Admin Routes ───────────────────────────────────────────────────────────
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,pharmacist'])->group(function () {
+
+    // Dashboard (already added in Feature 1)
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // ── Category Management ──────────────────────────────────────────────
+    Route::resource('categories', CategoryController::class);
+
+    // ── Medicine Management ──────────────────────────────────────────────
+    Route::resource('medicines', MedicineController::class);
+
+    // Quick stock update
+    Route::patch('medicines/{medicine}/stock', [MedicineController::class, 'updateStock'])
+         ->name('medicines.stock');
+
 });
 
 // ─── Pharmacist Routes (pharmacist & admin can access) ─────────────────────
