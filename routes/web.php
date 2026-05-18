@@ -5,7 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AdminController;
 use App\Http\Controllers\Auth\PharmacistController;
-use App\Http\Controllers\Auth\CustomerController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\MedicineController;
 
@@ -26,10 +26,18 @@ Route::post('/logout',[LoginController::class, 'logout'])->name('logout');
 Route::get('/register',  [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
-// ─── Admin Routes (only admin can access) ──────────────────────────────────
-
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\MedicineController;
+// General Dashboard (redirects based on user role)
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->isAdmin() || $user->isPharmacist()) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->isCustomer()) {
+            return redirect()->route('customer.dashboard');
+        }
+        return redirect()->route('home');
+    })->name('dashboard');
+});
 
 // ─── Admin Routes ───────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,pharmacist'])->group(function () {
