@@ -46,6 +46,24 @@
 
         .alert { border-radius: 10px; }
     </style>
+    <script>
+// ─── Update cart badge count on page load ──────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+        fetch('{{ route("cart.count") }}')
+            .then(res => res.json())
+            .then(data => {
+                badge.textContent = data.count;
+                // Hide badge if count is 0
+                badge.style.display = data.count > 0 ? 'inline' : 'none';
+            })
+            .catch(() => {
+                badge.style.display = 'none';
+            });
+    }
+});
+</script>
 
     @stack('styles')
 </head>
@@ -63,6 +81,19 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-center gap-2">
+            @auth
+<li class="nav-item">
+    <a href="{{ route('cart.index') }}" class="btn btn-outline-light btn-sm position-relative">
+        <i class="bi bi-cart3 fs-6"></i>
+        {{-- Cart count badge --}}
+        <span id="cart-badge"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="font-size:0.65rem;">
+            0
+        </span>
+    </a>
+</li>
+@endauth
             @auth
                 <li class="nav-item">
                     <span class="text-secondary small">

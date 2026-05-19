@@ -66,3 +66,32 @@ Route::prefix('pharmacist')->name('pharmacist.')->middleware(['auth', 'role:phar
 Route::prefix('customer')->name('customer.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
 });
+use App\Http\Controllers\CartController;
+
+// ─── Cart Routes ────────────────────────────────────────────────────────────
+// Cart is accessible to both guests and logged-in users
+Route::prefix('cart')->name('cart.')->group(function () {
+
+    // View cart page
+    Route::get('/',             [CartController::class, 'index'])->name('index');
+
+    // Add medicine to cart
+    Route::post('/add',         [CartController::class, 'add'])->name('add');
+
+    // Update item quantity
+    Route::patch('/{cartItem}', [CartController::class, 'update'])->name('update');
+
+    // Remove single item
+    Route::delete('/{cartItem}',[CartController::class, 'remove'])->name('remove');
+
+    // Clear entire cart
+    Route::delete('/',          [CartController::class, 'clear'])->name('clear');
+
+    // Get cart count (AJAX)
+    Route::get('/count',        [CartController::class, 'count'])->name('count');
+});
+use App\Http\Controllers\MedicineController;
+
+// Public medicine routes
+Route::get('/medicines',          [MedicineController::class, 'index'])->name('medicines.index');
+Route::get('/medicines/{medicine}',[MedicineController::class, 'show'])->name('medicines.show');
