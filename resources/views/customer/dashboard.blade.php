@@ -37,7 +37,7 @@
             </a>
         </div>
         <div class="col-md-6 col-lg-3 mb-3">
-            <a href="{{ route('cart.view') }}" class="card h-100 text-decoration-none text-dark card-hover">
+            <a href="{{ route('cart.index') }}" class="card h-100 text-decoration-none text-dark card-hover">
                 <div class="card-body text-center">
                     <i class="bi bi-bag-check fs-1 text-primary mb-3"></i>
                     <h5 class="card-title">My Cart</h5>
