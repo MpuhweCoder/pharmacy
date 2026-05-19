@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
@@ -12,26 +12,29 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'medicine_id',
+        'medicine_name',
+        'medicine_brand',
         'quantity',
-        'price',
+        'unit_price',
+        'original_price',
+        'discount',
+        'subtotal',
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'unit_price'     => 'decimal:2',
+        'original_price' => 'decimal:2',
+        'discount'       => 'decimal:2',
+        'subtotal'       => 'decimal:2',
     ];
 
-    /**
-     * Get the order that owns the item.
-     */
+    // ─── Relationships ─────────────────────────────────────────────────────
+
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Get the medicine for this item.
-     */
     public function medicine()
     {
         return $this->belongsTo(Medicine::class);
