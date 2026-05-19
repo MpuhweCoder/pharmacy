@@ -6,8 +6,12 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AdminController;
 use App\Http\Controllers\Auth\PharmacistController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HelpController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\MedicineController;
+use App\Http\Controllers\Admin\MedicineController as AdminMedicineController;
 
 // ─── Public Routes ─────────────────────────────────────────────────────────
 
@@ -49,10 +53,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin,pharmaci
     Route::resource('categories', CategoryController::class);
 
     // ── Medicine Management ──────────────────────────────────────────────
-    Route::resource('medicines', MedicineController::class);
+    Route::resource('medicines', AdminMedicineController::class);
 
     // Quick stock update
-    Route::patch('medicines/{medicine}/stock', [MedicineController::class, 'updateStock'])
+    Route::patch('medicines/{medicine}/stock', [AdminMedicineController::class, 'updateStock'])
          ->name('medicines.stock');
 
 });
@@ -65,6 +69,20 @@ Route::prefix('pharmacist')->name('pharmacist.')->middleware(['auth', 'role:phar
 // ─── Customer Routes (all logged-in users) ─────────────────────────────────
 Route::prefix('customer')->name('customer.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+});
+
+// ─── Order Routes (customers can view their orders) ───────────────────────────
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+});
+
+// ─── Prescription Routes (customers can manage prescriptions) ───────────────────
+Route::middleware(['auth'])->group(function () {
+    Route::get('/prescriptions', [PrescriptionController::class, 'index'])->name('prescriptions.index');
+    Route::get('/prescriptions/create', [PrescriptionController::class, 'create'])->name('prescriptions.create');
+    Route::post('/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
+    Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show'])->name('prescriptions.show');
 });
 use App\Http\Controllers\CartController;
 
@@ -92,6 +110,21 @@ Route::prefix('cart')->name('cart.')->group(function () {
 });
 use App\Http\Controllers\MedicineController;
 
+// ─── Profile Routes (authenticated users) ──────────────────────────────────
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [ProfileController::class, 'changePasswordForm'])->name('profile.change-password');
+    Route::patch('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password.update');
+});
+
 // Public medicine routes
 Route::get('/medicines',          [MedicineController::class, 'index'])->name('medicines.index');
 Route::get('/medicines/{medicine}',[MedicineController::class, 'show'])->name('medicines.show');
+
+// ─── Help/Support Routes ───────────────────────────────────────────────────
+Route::prefix('help')->name('help.')->group(function () {
+    Route::get('/', [HelpController::class, 'index'])->name('index');
+    Route::get('/contact', [HelpController::class, 'contact'])->name('contact');
+    Route::post('/contact', [HelpController::class, 'submitContact'])->name('submit');
+});
